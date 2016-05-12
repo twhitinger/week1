@@ -1,63 +1,98 @@
-
-def sequence(num, total)
-(1..num).map { ["r","g","b","y","o","w"][rand(total)] }.join
-end
-s = sequence(4,4)
-puts "Welcome to MASTERMIND"
-puts "Would you like to (p)lay, read the (i)nstructions, or (q)uit?"
-response = gets.chomp.downcase
-# If they enter p or play then they enter the game flow described below.
-# I have generated a beginner sequence with four elements made up of: (r)ed,
-# (g)reen, (b)lue, and (y)ellow. Use (q)uit at any time to end the game.
-# What's your guess?
-# They can then enter a guess in the form rrgb
-if response == ("p" || "play")
-  puts "I have generated a beginner sequence with four elements made up of:
-(r)ed, (g)reen, (b)lue, and (y)ello. Use (q)uit at any time to end the game."
-elsif response == ("i" || "instructions")
- puts "Enter some damn letters ---- rrrr rgby ggrb use your brain"
-elsif response == ("q" || "quit")
-  abort("She cannot take any more of this, Captain!")
-elsif response == ("c" || "cheat")
-  puts s
-  abort("Fucking cheater")
-elsif response == "restart"
-
-end
-
-
-
-
-  guess1 = nil
-  guess = 0
-
-until guess1 == s
-  i = 0
-  acc = []
-  present = 0
-  incorrect = 0
-
-  puts "What is your guess?"
-  guess1 = gets.chomp.downcase
-  guess1.each_char { |x|
-  	if s.chars[i] == x
-  		acc << x
-    elsif guess1.count(x) - s.count(x) > 0
-      incorrect = (guess1.count(x) - s.count(x))
+class Mastermind
+​
+  def initialize(length = 4, colors = 4)
+    @correct_answer = sequence(length, colors)
+    @matching_letters = []
+    @present = 0
+    @incorrect = 0
+    @counter = 0
+    @start = Time.now
+  end
+​
+  def sequence(num, total)
+    (1..num).map { ["r","g","b","y","o","w"][rand(total)] }.join
+  end
+​
+  def flow_control_begin
+    response = gets.chomp.downcase
+    if response == "p" || response == "play"
+      puts "I have generated a beginner sequence with four elements made up of:
+      (r)ed, (g)reen, (b)lue, and (y)ello. Use (q)uit at any time to end the game."
+    elsif response == "i" || response == "instructions"
+      puts "Enter some damn letters ---- rrrr rgby ggrb use your brain"
+      mastermind
+    elsif response == "q" || response == "quit"
+      abort("She cannot take any more of this, Captain!")
     end
+  end
+​
+  def mastermind
+    puts "Welcome to MASTERMIND"
+    puts "Would you like to (p)lay, read the (i)nstructions, or (q)uit?"
+    flow_control_begin
+    guess = ""
+    until guess == @correct_answer
+      puts "What is your guess?"
+      guess = gets.chomp.downcase
+      check_for_abort(guess)
+      while guess.length != 4
+        puts "Too short yo" if guess.length < 4
+        puts "Too long arr" if guess.length > 4
+        guess = gets.chomp.downcase
+      end
+      game_logic(guess)
+      puts @correct_answer
+      @counter += 1
 
-  	  i += 1
-  }
-    present = guess1.length - acc.length - incorrect
-
-
-  puts s
-
-  guess += 1
-
-
-  puts guess
-
-  puts "There are #{acc.length} correct answers in the correct position."
-  puts "#{present} answers that are present but in the wrong place, and #{incorrect} incorrect, this is guess # #{guess}"
+      computer_response(guess)
+    end
+  end
+​
+  def replay_game?
+    puts "Do you want to (p)lay again or (q)uit?"
+    response = gets.chomp.downcase
+    if response == "p" || response == "play"
+      play_again = Mastermind.new
+      play_again.mastermind
+    elsif response == "q" || response == "quit"
+      abort("She cannot take any more of this, Captain!")
+    end
+  end
+​
+  def check_for_abort(guess)
+    if guess == "c" || guess == "cheat"
+      puts @correct_answer
+      abort("Fucking cheater")
+    elsif guess == "q" || guess ==  "quit"
+      abort("She cannot take any more of this, Captain!")
+    end
+  end
+​
+  def game_logic(guess)
+    i = 0; @matching_letters = []; @incorrect = 0
+    guess.each_char do |x|
+      if @correct_answer.chars[i] == x
+        @matching_letters << x
+      elsif guess.count(x) - @correct_answer.count(x) > 0
+        @incorrect = (guess.count(x) - @correct_answer.count(x))
+      end
+      i += 1
+    end
+    @present = guess.length - @matching_letters.length - @incorrect
+  end
+​
+  def computer_response(guess)
+    if guess != @correct_answer
+      puts "There are #{@matching_letters.length} correct answers in the correct position."
+      puts "#{@present} answers that are present but in the wrong place, and #{@incorrect} incorrect, this is guess # #{@counter}"
+    else
+      finish = Time.now
+      puts "Congratulations! You guessed the sequence #{@correct_answer} in #{@counter} guesses over a duration of #{Time.at(finish - @start).utc.strftime("%M:%S") }."
+      replay_game?
+    end
+  end
+​
 end
+​
+new_game = Mastermind.new
+new_game.mastermind

@@ -16,3 +16,9 @@ def find_all_odds
   array = [1,2,3,4,5]
   array.find_all { |num| num.odd? }
 end
+
+def named_t
+  array = ["Taylor", "Fred", "Bob", "terry", "Jeff"]
+
+  array.select {|name| name.upcase[0] == "T"}
+end
