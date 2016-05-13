@@ -1,4 +1,5 @@
 class Mastermind
+  require './dialogue.rb'
 
   def initialize(length = 4, colors = 4)
     @correct_answer = sequence(length, colors)
@@ -7,10 +8,6 @@ class Mastermind
     @incorrect = 0
     @counter = 0
     @start = Time.now
-  end
-
-  def sequence(num, total)
-    (1..num).map { ["r","g","b","y","o","w"][rand(total)] }.join
   end
 
   def mastermind
@@ -33,6 +30,10 @@ class Mastermind
     end
   end
 
+  def sequence(num, total)
+    (1..num).map { ["r","g","b","y","o","w"][rand(total)] }.join
+  end
+
   def game_logic(guess)
     i = 0; @matching_letters = []; @incorrect = 0
     guess.each_char do |x|
@@ -51,10 +52,7 @@ class Mastermind
     if input == "p" || input == "play"
       game_difficulty
     elsif input == "i" || input == "instructions"
-      puts "Enter p or play and choose your difficulty level. When prompted enter your guess
-based on the generated sequence you select during level selection.
-Enter 4 characters for beginner (ie. rrrr) matching the first letter of the color you want to guess, 6 characters for intermediate, 8 characters for advanced.
-The colors will be displayed after selecting difficulty."
+      puts Dialogue.instruct
       mastermind
     elsif input == "q" || input == "quit"
       abort("She cannot take any more of this, Captain!")
@@ -66,17 +64,12 @@ The colors will be displayed after selecting difficulty."
     difficulty = gets.chomp.downcase
     if difficulty == "i" || difficulty == "intermediate"
       @correct_answer = sequence(6,5)
-      puts "I have generated an intermediate sequence with six elements made up of: (r)ed,
-(g)reen, (b)lue, (y)ellow and (o)range. Enter six characters as your guess (ie. rgbyor).
-Use (q)uit at any time to end the game."
+      puts Dialogue.intermediate_words
     elsif difficulty == "a" || difficulty == "advanced"
       @correct_answer = sequence(8,6)
-      puts "I have generated an advanced sequence with eight elements made up of: (r)ed,
-(g)reen, (b)lue, (y)ellow, (o)range and (w)hite. Enter eight characters as your guess (ie. rgbyowr).
-Use (q)uit at any time to end the game."
+      puts Dialogue.advanced_words
     elsif difficulty == "b" || difficulty == "beginner"
-      puts "I have generated a beginner sequence with four elements made up of: (r)ed,
-(g)reen, (b)lue, and (y)ellow. Use (q)uit at any time to end the game."
+      puts Dialogue.beginner_words
     else
       puts "enter the difficulty in the correct format"
       game_difficulty
@@ -114,11 +107,13 @@ Use (q)uit at any time to end the game."
 
   def computer_response(guess)
     if guess != @correct_answer
-      puts "There are #{@matching_letters.length} correct answers in the correct position."
-      puts "#{@present} answers that are present but in the wrong place, and #{@incorrect} incorrect, this is guess # #{@counter}"
+      puts "There are #{@matching_letters.length} correct answers in the correct position.
+#{@present} answers that are present but in the wrong place, and #{@incorrect} incorrect,
+this is guess # #{@counter}"
     else
       finish = Time.now
-      puts "Congratulations! You guessed the sequence #{@correct_answer} in #{@counter} guesses over a duration of #{Time.at(finish - @start).utc.strftime("%M:%S") }."
+      puts "Congratulations! You guessed the sequence #{@correct_answer} in #{@counter}
+guesses over a duration of #{Time.at(finish - @start).utc.strftime("%M minutes %S seconds") }."
       replay_game?
     end
   end
